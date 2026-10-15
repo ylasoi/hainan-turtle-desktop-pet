@@ -13,6 +13,7 @@ namespace HainanTurtlePet
         internal readonly Rectangle[] Bounds = new Rectangle[40];
         internal readonly int CellWidth, CellHeight;
         internal readonly float CharacterScale;
+        private readonly Rectangle commonBounds;
 
         private SpriteAtlas(Bitmap bitmap)
         {
@@ -21,7 +22,7 @@ namespace HainanTurtlePet
             CellHeight = sheet.Height / 10;
             if (sheet.Width % 4 != 0 || sheet.Height % 10 != 0)
                 throw new InvalidDataException("Sprite sheet must have 4 columns and 10 rows (40 animation frames).");
-            int maxWidth = 0, maxHeight = 0;
+            Rectangle union = Rectangle.Empty;
             for (int index = 0; index < Bounds.Length; index++)
             {
                 int baseX = (index % 4) * CellWidth, baseY = (index / 4) * CellHeight;
@@ -32,10 +33,11 @@ namespace HainanTurtlePet
                         { left = Math.Min(left, x); top = Math.Min(top, y); right = Math.Max(right, x); bottom = Math.Max(bottom, y); }
                 if (right < left || bottom < top) throw new InvalidDataException("A sprite frame is empty.");
                 Bounds[index] = new Rectangle(baseX + left, baseY + top, right - left + 1, bottom - top + 1);
-                maxWidth = Math.Max(maxWidth, Bounds[index].Width);
-                maxHeight = Math.Max(maxHeight, Bounds[index].Height);
+                Rectangle local = new Rectangle(left, top, right - left + 1, bottom - top + 1);
+                union = union.IsEmpty ? local : Rectangle.Union(union, local);
             }
-            CharacterScale = 1f / Math.Max(maxWidth, maxHeight);
+            commonBounds = union;
+            CharacterScale = 1f / Math.Max(union.Width, union.Height);
         }
 
         internal static SpriteAtlas LoadEmbedded()
@@ -59,7 +61,9 @@ namespace HainanTurtlePet
                 graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                Rectangle source = Bounds[Math.Max(0, Math.Min(Bounds.Length - 1, frame))];
+                int index = Math.Max(0, Math.Min(Bounds.Length - 1, frame));
+                Rectangle source = new Rectangle((index % 4) * CellWidth + commonBounds.X,
+                    (index / 4) * CellHeight + commonBounds.Y, commonBounds.Width, commonBounds.Height);
                 float scale = size * CharacterScale;
                 float targetWidth = source.Width * scale, targetHeight = source.Height * scale;
                 float lift = moving ? (float)Math.Abs(Math.Sin(seconds * 12)) * 2.2f :

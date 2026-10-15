@@ -13,6 +13,8 @@ namespace HainanTurtlePet
         private readonly string settingsPath, smokeOutput;
         private readonly PetSettings settings;
         private readonly Timer ticker = new Timer();
+        private readonly System.Threading.EventWaitHandle exitRequest = new System.Threading.EventWaitHandle(false,
+            System.Threading.EventResetMode.AutoReset, "Local\\HainanTurtleDesktopPet.Exit");
         private readonly Stopwatch clock = Stopwatch.StartNew();
         private readonly Random random = new Random();
         private readonly ContextMenuStrip menu = new ContextMenuStrip();
@@ -21,10 +23,10 @@ namespace HainanTurtlePet
         private readonly ToolStripMenuItem walkMenu, topMenu, sleepMenu;
         private PetMotion motion;
         private Bitmap lastFrame;
-        private double lastTime, poseUntil, messageUntil, nextDecision, blinkAt, ignoreClickUntil;
+        private double lastTime, poseUntil, messageUntil, nextDecision, blinkAt, ignoreClickUntil, sleepStarted, wakeStarted;
         private string message;
         private int pose, interactionCount, presentedFrames, smokeStep;
-        private bool walking, sleeping, dragging, dragMoved, hovering;
+        private bool walking, sleeping, waking, dragging, dragMoved, hovering;
         private Point dragCursor, dragOrigin;
 
         protected override bool ShowWithoutActivation { get { return true; } }
@@ -108,6 +110,7 @@ namespace HainanTurtlePet
 
         private void Tick(object sender, EventArgs e)
         {
+            if (exitRequest.WaitOne(0)) { Close(); return; }
             double now = clock.Elapsed.TotalSeconds;
             double elapsed = Math.Min(.1, now - lastTime);
             lastTime = now;
@@ -133,7 +136,17 @@ namespace HainanTurtlePet
         private int CurrentFrame()
         {
             double now = clock.Elapsed.TotalSeconds;
-            if (sleeping) return 24 + ((int)(now / .3) % 8);
+            if (sleeping)
+            {
+                double elapsed = now - sleepStarted;
+                return elapsed < .88 ? 24 + Math.Min(3, (int)(elapsed / .22)) : 27;
+            }
+            if (waking)
+            {
+                int step = (int)((now - wakeStarted) / .18);
+                if (step < 3) return 29 + step;
+                waking = false;
+            }
             if (now < poseUntil && pose == 7) return 32 + ((int)(now / .18) % 8);
             if (now < poseUntil && (pose == 3 || pose == 5)) return 16 + ((int)(now / .16) % 8);
             if (dragging || motion.Falling) return 16;
@@ -158,12 +171,16 @@ namespace HainanTurtlePet
         private void Say(string text, double seconds) { message = text; messageUntil = clock.Elapsed.TotalSeconds + seconds; }
         private void SetPose(int frame, double seconds, string text)
         { pose = frame; poseUntil = clock.Elapsed.TotalSeconds + seconds; Say(text, seconds + 1.2); RenderNow(); }
-        private void Wake() { sleeping = false; nextDecision = clock.Elapsed.TotalSeconds + 3; }
+        private void Wake()
+        {
+            if (sleeping) { waking = true; wakeStarted = clock.Elapsed.TotalSeconds; }
+            sleeping = false; nextDecision = clock.Elapsed.TotalSeconds + 3;
+        }
         private void ToggleSleep()
         {
-            sleeping = !sleeping; walking = false;
-            if (sleeping) Say("龟壳一盖，谁也不爱。", 3);
-            else { nextDecision = clock.Elapsed.TotalSeconds + 3; SetPose(3, 1.5, "睡醒了，腿毛还在。 "); }
+            walking = false;
+            if (sleeping) { Wake(); SetPose(3, 1.5, "睡醒了，腿毛还在。 "); }
+            else { sleeping = true; waking = false; sleepStarted = clock.Elapsed.TotalSeconds; Say("龟壳一盖，谁也不爱。", 3); }
             RenderNow();
         }
 
@@ -251,14 +268,14 @@ namespace HainanTurtlePet
                 BeginDrag(start); MoveDragged(new Point(start.X - 36, start.Y - 70)); EndDrag();
             }
             if (seconds > 2.8 && smokeStep == 4) { smokeStep++; ToggleSleep(); }
-            if (seconds > 3.3 && smokeStep == 5) { smokeStep++; ToggleSleep(); SetPose(7, .4, "桌面渲染测试"); }
-            if (seconds > 4 && smokeStep == 6)
+            if (seconds > 4.2 && smokeStep == 5) { smokeStep++; ToggleSleep(); SetPose(7, .4, "桌面渲染测试"); }
+            if (seconds > 5 && smokeStep == 6)
             {
                 smokeStep++; ResizePet(220); walkMenu.PerformClick(); topMenu.PerformClick(); topMenu.PerformClick();
                 if (settings.AutoWalk || !settings.AlwaysOnTop) throw new InvalidOperationException("Menu state did not update.");
                 SetPose(0, 1.5, "写实腿毛龟 · 渲染通过");
             }
-            if (seconds > 4.8 && smokeStep == 7)
+            if (seconds > 5.8 && smokeStep == 7)
             {
                 smokeStep++; Directory.CreateDirectory(smokeOutput);
                 lastFrame.Save(Path.Combine(smokeOutput, "window-frame.png"), ImageFormat.Png);
@@ -271,7 +288,7 @@ namespace HainanTurtlePet
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
-            ticker.Stop(); ticker.Dispose(); SaveSettings(); tray.Visible = false; tray.Dispose();
+            ticker.Stop(); ticker.Dispose(); exitRequest.Dispose(); SaveSettings(); tray.Visible = false; tray.Dispose();
             menu.Dispose(); if (lastFrame != null) lastFrame.Dispose(); petIcon.Dispose(); base.OnFormClosed(e);
         }
     }

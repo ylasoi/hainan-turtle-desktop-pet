@@ -16,6 +16,16 @@ namespace HainanTurtlePet
             try { NativeMethods.SetProcessDPIAware(); } catch (EntryPointNotFoundException) { }
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            if (args.Length > 0 && args[0] == "--quit")
+            {
+                try
+                {
+                    using (EventWaitHandle request = EventWaitHandle.OpenExisting("Local\\HainanTurtleDesktopPet.Exit"))
+                        request.Set();
+                }
+                catch (WaitHandleCannotBeOpenedException) { }
+                return 0;
+            }
             if (args.Length > 0 && args[0] == "--self-test")
                 return SelfTest.Run(args.Length > 1 ? args[1] : "test-results");
 

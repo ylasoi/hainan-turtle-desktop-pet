@@ -82,7 +82,7 @@
       "webp": "animations/wave.webp"
     },
     "sleep": {
-      "label": "缩壳打盹",
+      "label": "完整缩壳",
       "frame_count": 8,
       "duration_ms": 300,
       "loop": true,
