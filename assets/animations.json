@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "canvas": [
+    384,
+    384
+  ],
+  "anchor": [
+    0.5,
+    0.92
+  ],
+  "atlas": "sprites.png",
+  "atlas_columns": 4,
+  "atlas_rows": 10,
+  "animations": {
+    "walk": {
+      "label": "爬行",
+      "frame_count": 8,
+      "duration_ms": 140,
+      "loop": true,
+      "first_atlas_frame": 0,
+      "frames": [
+        "frames/walk/000.png",
+        "frames/walk/001.png",
+        "frames/walk/002.png",
+        "frames/walk/003.png",
+        "frames/walk/004.png",
+        "frames/walk/005.png",
+        "frames/walk/006.png",
+        "frames/walk/007.png"
+      ],
+      "sheet": "sheets/walk.png",
+      "sheet_columns": 4,
+      "sheet_rows": 2,
+      "apng": "animations/walk.png",
+      "gif": "animations/walk.gif",
+      "webp": "animations/walk.webp"
+    },
+    "idle": {
+      "label": "呼吸眨眼",
+      "frame_count": 8,
+      "duration_ms": 300,
+      "loop": true,
+      "first_atlas_frame": 8,
+      "frames": [
+        "frames/idle/000.png",
+        "frames/idle/001.png",
+        "frames/idle/002.png",
+        "frames/idle/003.png",
+        "frames/idle/004.png",
+        "frames/idle/005.png",
+        "frames/idle/006.png",
+        "frames/idle/007.png"
+      ],
+      "sheet": "sheets/idle.png",
+      "sheet_columns": 4,
+      "sheet_rows": 2,
+      "apng": "animations/idle.png",
+      "gif": "animations/idle.gif",
+      "webp": "animations/idle.webp"
+    },
+    "wave": {
+      "label": "抬手互动",
+      "frame_count": 8,
+      "duration_ms": 160,
+      "loop": true,
+      "first_atlas_frame": 16,
+      "frames": [
+        "frames/wave/000.png",
+        "frames/wave/001.png",
+        "frames/wave/002.png",
+        "frames/wave/003.png",
+        "frames/wave/004.png",
+        "frames/wave/005.png",
+        "frames/wave/006.png",
+        "frames/wave/007.png"
+      ],
+      "sheet": "sheets/wave.png",
+      "sheet_columns": 4,
+      "sheet_rows": 2,
+      "apng": "animations/wave.png",
+      "gif": "animations/wave.gif",
+      "webp": "animations/wave.webp"
+    },
+    "sleep": {
+      "label": "缩壳打盹",
+      "frame_count": 8,
+      "duration_ms": 300,
+      "loop": true,
+      "first_atlas_frame": 24,
+      "frames": [
+        "frames/sleep/000.png",
+        "frames/sleep/001.png",
+        "frames/sleep/002.png",
+        "frames/sleep/003.png",
+        "frames/sleep/004.png",
+        "frames/sleep/005.png",
+        "frames/sleep/006.png",
+        "frames/sleep/007.png"
+      ],
+      "sheet": "sheets/sleep.png",
+      "sheet_columns": 4,
+      "sheet_rows": 2,
+      "apng": "animations/sleep.png",
+      "gif": "animations/sleep.gif",
+      "webp": "animations/sleep.webp"
+    },
+    "mischief": {
+      "label": "回头搞怪",
+      "frame_count": 8,
+      "duration_ms": 180,
+      "loop": true,
+      "first_atlas_frame": 32,
+      "frames": [
+        "frames/mischief/000.png",
+        "frames/mischief/001.png",
+        "frames/mischief/002.png",
+        "frames/mischief/003.png",
+        "frames/mischief/004.png",
+        "frames/mischief/005.png",
+        "frames/mischief/006.png",
+        "frames/mischief/007.png"
+      ],
+      "sheet": "sheets/mischief.png",
+      "sheet_columns": 4,
+      "sheet_rows": 2,
+      "apng": "animations/mischief.png",
+      "gif": "animations/mischief.gif",
+      "webp": "animations/mischief.webp"
+    }
+  }
+}
